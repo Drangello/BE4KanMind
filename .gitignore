@@ -1,1 +1,12 @@
-/venv
+# Environments
+venv/
+.env
+
+# Python
+*.pyc
+__pycache__/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
