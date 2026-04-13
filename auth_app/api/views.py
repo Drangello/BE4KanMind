@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from .serializers import RegistrationSerializer, LoginSerializer
 
 class RegistrationView(APIView):
@@ -22,8 +22,9 @@ class RegistrationView(APIView):
             token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'token': token.key,
-                'username': user.username,
-                'email': user.email
+                'fullname': user.fullname,
+                'email': user.email,
+                'user_id': user.id
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -40,7 +41,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = authenticate(
-                username=serializer.validated_data['username'],
+                email=serializer.validated_data['email'],
                 password=serializer.validated_data['password']
             )
             return self._handle_authentication(user)
@@ -54,10 +55,11 @@ class LoginView(APIView):
             token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'token': token.key,
-                'username': user.username,
-                'email': user.email
+                'fullname': user.fullname,
+                'email': user.email,
+                'user_id': user.id
             }, status=status.HTTP_200_OK)
         return Response(
             {"error": "Invalid Credentials"},
-            status=status.HTTP_401_UNAUTHORIZED
+            status=status.HTTP_400_BAD_REQUEST
         )

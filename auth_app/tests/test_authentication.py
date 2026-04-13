@@ -14,7 +14,7 @@ class RegistrationTests(APITestCase):
 
     def test_registration_success(self):
         data = {
-            "username": "testuser",
+            "fullname": "John Doe",
             "email": "test@example.com",
             "password": "StrongPassword123!",
             "repeated_password": "StrongPassword123!"
@@ -22,10 +22,15 @@ class RegistrationTests(APITestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('token', response.data)
+        self.assertIn('fullname', response.data)
+        self.assertIn('email', response.data)
+        self.assertIn('user_id', response.data)
+        self.assertEqual(response.data['fullname'], "John Doe")
+        self.assertEqual(response.data['email'], "test@example.com")
 
     def test_registration_password_mismatch(self):
         data = {
-            "username": "testuser",
+            "fullname": "John Doe",
             "email": "test@example.com",
             "password": "StrongPassword123!",
             "repeated_password": "WrongPassword!"
@@ -46,25 +51,30 @@ class LoginTests(APITestCase):
     def setUp(self):
         self.url = reverse('login')
         self.user = User.objects.create_user(
-            username="loginuser",
+            username="login@example.com",
             email="login@example.com",
+            fullname="Login User",
             password="LoginPassword123!"
         )
 
     def test_login_success(self):
         data = {
-            "username": "loginuser",
+            "email": "login@example.com",
             "password": "LoginPassword123!"
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
+        self.assertIn('fullname', response.data)
+        self.assertIn('email', response.data)
+        self.assertIn('user_id', response.data)
+        self.assertEqual(response.data['fullname'], "Login User")
 
     def test_login_failure(self):
         data = {
-            "username": "loginuser",
+            "email": "login@example.com",
             "password": "WrongPassword!"
         }
         response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
