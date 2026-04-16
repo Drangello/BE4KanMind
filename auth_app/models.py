@@ -3,7 +3,7 @@ from django.db import models
 
 class User(AbstractUser):
     """
-    Custom user model for the Kanban application.
+    Custom user model.
     """
     email = models.EmailField(unique=True)
     fullname = models.CharField(max_length=255, blank=True)
