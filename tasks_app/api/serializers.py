@@ -54,3 +54,14 @@ class TaskSerializer(serializers.ModelSerializer):
     def _validate_board_role(self, user_obj, board, field_name):
         if user_obj and user_obj not in board.members.all() and user_obj != board.owner:
             raise serializers.ValidationError({field_name: "User is not a board member."})
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserNestedSerializer(read_only=True)
+
+    class Meta:
+        model = Task.comments.rel.related_model if hasattr(Task, 'comments') else None
+        # using the correct model import below to prevent lazy-load issues
+        from tasks_app.models import Comment
+        model = Comment
+        fields = ('id', 'task', 'author', 'content', 'created_at')
+        read_only_fields = ('author',)

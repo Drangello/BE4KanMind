@@ -32,3 +32,31 @@ class TaskViewSet(viewsets.ModelViewSet):
         tasks = self.get_queryset().filter(reviewer=request.user)
         serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data)
+
+from .serializers import CommentSerializer
+from .permissions import IsCommentAuthor
+from tasks_app.models import Comment
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsCommentAuthor]
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = Comment.objects.filter(
+            Q(task__board__owner=user) | Q(task__board__members=user)
+        ).distinct()
+        
+        task_id = self.request.query_params.get('task')
+        if task_id:
+            qs = qs.filter(task_id=task_id)
+        return qs
+
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+        task = serializer.validated_data.get('task')
+        user = self.request.user
+        if user != task.board.owner and user not in task.board.members.all():
+            raise PermissionDenied("You must belong to board to comment.")
+        serializer.save(author=user)
