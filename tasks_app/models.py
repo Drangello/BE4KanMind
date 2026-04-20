@@ -11,6 +11,7 @@ class Task(models.Model):
     board = models.ForeignKey(Board, related_name='tasks', on_delete=models.CASCADE)
     assignee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='assigned_tasks', on_delete=models.SET_NULL, null=True, blank=True)
     reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reviewed_tasks', on_delete=models.SET_NULL, null=True, blank=True)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_tasks', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
