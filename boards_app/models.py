@@ -5,8 +5,7 @@ class Board(models.Model):
     """
     Board model representing a Kanban board.
     """
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -20,4 +19,4 @@ class Board(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return self.title
