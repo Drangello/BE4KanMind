@@ -2,12 +2,20 @@ from rest_framework import permissions
 
 class IsTaskCreatorOrBoardOwner(permissions.BasePermission):
     """
-    Object-level permission to allow only task creators or board owners to delete.
+    Object-level permission:
+    - SAFE_METHODS & PUT/PATCH: must be board member/owner.
+    - DELETE: must be creator or owner.
     """
     def has_object_permission(self, request, view, obj):
+        user = request.user
+        board = obj.board
+        
+        is_member = user == board.owner or user in board.members.all()
+        
         if request.method in permissions.SAFE_METHODS or request.method in ['PUT', 'PATCH']:
-            # Assume update permissibility is caught by valid membership logic
-            # meaning anyone in the board can update a task.
-            return True
-        # For DELETE
-        return obj.creator == request.user or obj.board.owner == request.user
+            return is_member
+            
+        if request.method == 'DELETE':
+            return user == obj.creator or user == board.owner
+            
+        return False

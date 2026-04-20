@@ -3,28 +3,54 @@ from tasks_app.models import Task
 from boards_app.models import Board
 from django.contrib.auth import get_user_model
 
+User = get_user_model()
+
+class UserNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'fullname')
+
 class TaskSerializer(serializers.ModelSerializer):
+    assignee = UserNestedSerializer(read_only=True)
+    reviewer = UserNestedSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='assignee', allow_null=True, required=False, write_only=True
+    )
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='reviewer', allow_null=True, required=False, write_only=True
+    )
+    comments_count = serializers.SerializerMethodField()
+    status = serializers.ChoiceField(choices=["to-do", "in-progress", "review", "done"], default="to-do")
+    priority = serializers.ChoiceField(choices=["low", "medium", "high"], default="medium")
+
     class Meta:
         model = Task
-        fields = ('id', 'title', 'description', 'status', 'priority', 'due_date', 'board', 'assignee', 'reviewer', 'creator')
-        read_only_fields = ('creator',)
+        fields = ('id', 'board', 'title', 'description', 'status', 'priority', 
+                  'assignee', 'reviewer', 'assignee_id', 'reviewer_id', 'due_date', 'comments_count')
+
+    def get_comments_count(self, obj):
+        if hasattr(obj, 'comments'):
+            return obj.comments.count()
+        return 0
 
     def validate_board(self, value):
+        from rest_framework.exceptions import PermissionDenied
         if self.instance and self.instance.board != value:
             raise serializers.ValidationError("Cannot move a task to a different board.")
+        user = self.context['request'].user
+        if user != value.owner and user not in value.members.all():
+            raise PermissionDenied("You must belong to board to create task.")
         return value
 
     def validate(self, attrs):
         board = attrs.get('board')
         if not board and self.instance:
             board = self.instance.board
-            
-        assignee = attrs.get('assignee')
-        if assignee and assignee not in board.members.all() and assignee != board.owner:
-            raise serializers.ValidationError({"assignee": "User is not a board member."})
-            
-        reviewer = attrs.get('reviewer')
-        if reviewer and reviewer not in board.members.all() and reviewer != board.owner:
-            raise serializers.ValidationError({"reviewer": "User is not a board member."})
-            
+        
+        self._validate_board_role(attrs.get('assignee'), board, "assignee")
+        self._validate_board_role(attrs.get('reviewer'), board, "reviewer")
         return attrs
+
+    def _validate_board_role(self, user_obj, board, field_name):
+        if user_obj and user_obj not in board.members.all() and user_obj != board.owner:
+            raise serializers.ValidationError({field_name: "User is not a board member."})
