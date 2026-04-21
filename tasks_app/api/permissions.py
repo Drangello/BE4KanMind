@@ -2,9 +2,10 @@ from rest_framework import permissions
 
 class IsTaskCreatorOrBoardOwner(permissions.BasePermission):
     """
-    Object-level permission:
-    - SAFE_METHODS & PUT/PATCH: must be board member/owner.
-    - DELETE: must be creator or owner.
+    Object-level permission for Tasks.
+    
+    - SAFE_METHODS & PUT/PATCH: The user must be a member or owner of the task's board.
+    - DELETE: The user must be the original creator of the task, or the board owner.
     """
     def has_object_permission(self, request, view, obj):
         user = request.user
@@ -21,8 +22,9 @@ class IsTaskCreatorOrBoardOwner(permissions.BasePermission):
 
 class IsCommentAuthor(permissions.BasePermission):
     """
-    Object-level permission:
-    - DELETE: must be author.
+    Object-level permission for Comments.
+    
+    - DELETE: Only the author of the comment may delete it.
     """
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:

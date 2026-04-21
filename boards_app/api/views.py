@@ -12,6 +12,14 @@ from rest_framework.permissions import IsAuthenticated
 User = get_user_model()
 
 class BoardViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for viewing and manipulating Board instances.
+
+    Provides standard CRUD operations.
+    - list: Returns boards where the user is an owner or member.
+    - retrieve: Returns detailed board data including nested tasks.
+    - create/update: Handles board property changes and member assignment.
+    """
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
@@ -50,6 +58,11 @@ class BoardViewSet(viewsets.ModelViewSet):
             board.members.add(board.owner)
 
 class EmailCheckView(APIView):
+    """
+    API view to check if a user with a given email exists.
+
+    Used primarily to find users to add as board members.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

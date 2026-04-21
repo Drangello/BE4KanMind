@@ -3,6 +3,20 @@ from django.conf import settings
 from boards_app.models import Board
 
 class Task(models.Model):
+    """
+    Task model representing an actionable item on a Kanban Board.
+    
+    Attributes:
+        title (CharField): Title of the task.
+        description (TextField): Detailed description.
+        status (CharField): Flow state (to-do, in-progress, review, done).
+        priority (CharField): Importance (low, medium, high).
+        due_date (DateField): Deadline for the task.
+        board (ForeignKey): The Board this task belongs to.
+        assignee (ForeignKey): User assigned to work on the task.
+        reviewer (ForeignKey): User assigned to review the task.
+        creator (ForeignKey): User who created the task.
+    """
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=50, default='to-do')
@@ -17,6 +31,15 @@ class Task(models.Model):
         return self.title
 
 class Comment(models.Model):
+    """
+    Comment model for discussion on Tasks.
+    
+    Attributes:
+        task (ForeignKey): The Task being commented on.
+        author (ForeignKey): The User who wrote the comment.
+        content (TextField): The body of the comment.
+        created_at (DateTimeField): When the comment was created.
+    """
     task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='comments', on_delete=models.CASCADE)
     content = models.TextField()

@@ -4,6 +4,12 @@ from django.conf import settings
 class Board(models.Model):
     """
     Board model representing a Kanban board.
+
+    Attributes:
+        title (CharField): The name of the board.
+        created_at (DateTimeField): The timestamp when the board was created.
+        owner (ForeignKey): The User who created and owns the board.
+        members (ManyToManyField): Users who have access to view and interact with the board.
     """
     title = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

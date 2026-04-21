@@ -8,6 +8,13 @@ from .serializers import TaskSerializer
 from .permissions import IsTaskCreatorOrBoardOwner
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for viewing and manipulating Task instances.
+    
+    Provides standard CRUD operations, restricted to boards the user has access to.
+    Includes custom actions for retrieving tasks specifically assigned to or
+    being reviewed by the current user.
+    """
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated, IsTaskCreatorOrBoardOwner]
 
@@ -38,6 +45,12 @@ from .permissions import IsCommentAuthor
 from tasks_app.models import Comment
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for viewing, adding, and deleting comments on tasks.
+    
+    Users can only comment on tasks within boards they have access to.
+    Updating comments is not permitted.
+    """
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsCommentAuthor]
     http_method_names = ['get', 'post', 'delete', 'head', 'options']

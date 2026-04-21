@@ -6,11 +6,20 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class UserNestedSerializer(serializers.ModelSerializer):
+    """
+    Minimal User serializer for nesting within a Task to show assignee/reviewer.
+    """
     class Meta:
         model = User
         fields = ('id', 'email', 'fullname')
 
 class TaskSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Task instances.
+    
+    Handles read/write of task data, enforcing board membership validation
+    for assignees, reviewers, and the task creator.
+    """
     assignee = UserNestedSerializer(read_only=True)
     reviewer = UserNestedSerializer(read_only=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -56,11 +65,14 @@ class TaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({field_name: "User is not a board member."})
 
 class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Comment instances.
+    
+    Author is automatically populated via view's perform_create method.
+    """
     author = serializers.CharField(source='author.fullname', read_only=True)
 
     class Meta:
-        model = Task.comments.rel.related_model if hasattr(Task, 'comments') else None
-        # using the correct model import below to prevent lazy-load issues
         from tasks_app.models import Comment
         model = Comment
         fields = ('id', 'task', 'author', 'content', 'created_at')
