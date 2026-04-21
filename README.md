@@ -1,90 +1,59 @@
 # Kanban Board REST API
 
-Eine robuste, kollaborative Kanban-Board-API, entwickelt mit Django REST Framework (DRF).
+A Django REST Framework (DRF) backend for a collaborative Kanban Board application. It supports user authentication, board management, task tracking, and threaded comments.
 
-## 🚀 Features
-- **Authentifizierung**: Token-basiertes Login mit benutzerdefinierten User-Modellen (Email-Login).
-- **Board-Management**: Rollenbasierte Zugriffskontrolle (Owner vs. Member).
-- **Task-Management**: Status-Tracking, Priorisierung und Zuweisungen.
-- **Threaded Comments**: Verschachtelte Kommentarfunktion für Aufgaben.
-- **Sicherheit**: Objekt-Level-Berechtigungen gegen IDOR-Schwachstellen.
+## Setup & Run Locally
 
----
-
-## 🛠️ Voraussetzungen
-- Python 3.10+
-- `pip` (Python Paket-Manager)
-
-## 🚀 Setup & Installation
-
-1. **Repository klonen**:
+1. **Create and activate a virtual environment**:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
    ```
-
-2. **Virtuelle Umgebung erstellen & aktivieren**:
-   ```bash
-   python -m venv venv
-   # Windows:
-   venv\Scripts\activate
-   # macOS/Linux:
-   source venv/bin/activate
-   ```
-
-3. **Abhängigkeiten installieren**:
+2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-
-4. **Umgebungsvariablen konfigurieren**:
-   Erstelle eine `.env` Datei im Hauptverzeichnis (basierend auf `.env.example`) und hinterlege deine `SECRET_KEY` und `DEBUG` Einstellungen.
-
-5. **Datenbank-Migrationen ausführen**:
+3. **Run database migrations**:
    ```bash
    python manage.py migrate
    ```
-
-6. **Server starten**:
+4. **Start the development server**:
    ```bash
    python manage.py runserver
    ```
-   Die API ist unter `http://127.0.0.1:8000/` verfügbar.
+The API will be available at `http://127.0.0.1:8000/`.
 
 ---
+## Testing
 
-## 🧪 Testing
+Run test suite:
 
-Führe die Test-Suite aus, um die Integrität der API sicherzustellen:
 ```bash
 python manage.py test
 ```
 
----
+## Architecture & Apps
 
-## 🏗️ Architektur & Module
+The monolith API is split into three main Django applications:
 
-Das System ist modular in drei Apps unterteilt:
-- **`auth_app`**: Identity & Access Management (Custom User, Token Auth).
-- **`boards_app`**: Board-Logik (Besitzverhältnisse, Einladungen).
-- **`tasks_app`**: Aufgaben-Management & Kommentar-Thread-Struktur.
+- **`auth_app`**: Identity management. Features custom User models logging in via Email. Returns Token Authentication keys.
+- **`boards_app`**: Board management. Every Kanban board has a single owner and multiple invited members. 
+- **`tasks_app`**: Tasks and comments. Tracks task status, priority, and assignees. Tasks strictly belong to a parent board.
 
----
+## Security & Permissions
 
-## 🔐 Security & Permissions
+Security is strictly enforced on an object-level basis to prevent unauthorized data access (IDOR).
+- **Authentication**: All major endpoints require an `Authorization: Token <key>` header.
+- **Board Visibility**: Users can only fetch and update data for boards they own or are members of.
+- **Role Actions**: 
+  - Only **Owners** can delete their boards.
+  - Only **Creators** or **Owners** can delete a task.
+  - Only **Comment Authors** can delete their comments.
 
-- **Authentifizierung**: Erfordert `Authorization: Token <key>` im Header.
-- **Visibility**: Striktes Object-Level-Permission-Handling (User sehen nur Boards, denen sie zugeordnet sind).
-- **Role Actions**:
-  - *Owner*: Board-Löschung möglich.
-  - *Creator/Owner*: Task-Löschung möglich.
-  - *Author*: Kommentar-Löschung möglich.
+## Database Relationships
 
----
-
-## 🗄️ Datenhaltung & Beziehungen
-
-- **Cascading Deletes**:
-  - Board gelöscht → Alle Tasks werden entfernt.
-  - Task gelöscht → Alle zugehörigen Kommentare werden entfernt.
-- **Data Preservation**: Beim Löschen eines Users bleiben Tasks/Kommentare erhalten; die User-Referenz wird auf `NULL` gesetzt, um die Historie zu wahren.
+- **Cascading Deletes**: Deleting a Board removes all underlying Tasks. Deleting a Task removes all underlying Comments.
+- **Data Preservation**: Deleting a user does NOT delete the tasks they reviewed or were assigned to; instead, their ID is set to `NULL` to preserve board history.
