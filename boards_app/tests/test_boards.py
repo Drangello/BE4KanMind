@@ -16,8 +16,8 @@ class BoardTests(APITestCase):
         self.board = Board.objects.create(title="Board 1", owner=self.user1)
         self.board.members.add(self.user1, self.user2)
 
-        self.task1 = Task.objects.create(title="T1", board=self.board, status="to-do", priority="high")
-        self.task2 = Task.objects.create(title="T2", board=self.board, status="in-progress")
+        self.task1 = Task.objects.create(title="T1", board=self.board, status="to-do", priority="high", creator=self.user1)
+        self.task2 = Task.objects.create(title="T2", board=self.board, status="in-progress", creator=self.user1)
 
         self.list_url = reverse('board-list')
         self.detail_url = reverse('board-detail', args=[self.board.id])

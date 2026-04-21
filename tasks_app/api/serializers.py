@@ -56,7 +56,7 @@ class TaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({field_name: "User is not a board member."})
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = UserNestedSerializer(read_only=True)
+    author = serializers.CharField(source='author.fullname', read_only=True)
 
     class Meta:
         model = Task.comments.rel.related_model if hasattr(Task, 'comments') else None

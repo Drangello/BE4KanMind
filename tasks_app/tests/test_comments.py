@@ -38,7 +38,7 @@ class CommentTests(APITestCase):
         data = {"task": self.task1.id, "content": "New comment"}
         response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['author']['id'], self.u_member.id)
+        self.assertEqual(response.data['author'], self.u_member.fullname)
 
     def test_create_forbidden_for_outsider(self):
         self.client.force_authenticate(user=self.u_outsider)

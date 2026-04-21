@@ -1,82 +1,111 @@
-# Kanban Backend API
+# Kanban Backend API (Django REST Framework)
 
-A production-ready Kanban backend API built with Django and Django REST Framework. This repository contains purely the backend code (in the `BE/` directory), separated strictly from the frontend.
+A RESTful backend for a Kanban system built with Django REST Framework. It supports boards, tasks, and comments with strict role-based access control (owner/member) and secure object-level permissions.
 
-## Setup
+The API is designed for clean architecture, predictable responses, and safe multi-user collaboration.
 
-1. **Create and activate a virtual environment:**
-   ```bash
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
+---
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Tech Stack
 
-3. **Run migrations:**
-   ```bash
-   python manage.py migrate
-   ```
+- Django 5.x
+- Django REST Framework 3.x
+- SQLite (development)
+- Token Authentication
 
-4. **Run the development server:**
-   ```bash
-   python manage.py runserver
-   ```
+---
 
-## Development and Testing
+## Project Structure
 
-The backend is configured with comprehensive CORS support (`django-cors-headers`) to allow local frontend access natively (`CORS_ALLOW_ALL_ORIGINS = True`). tests are strictly required before merging any features. Run tests with:
+BE/
+├── core/
+├── auth_app/
+├── boards_app/
+├── tasks_app/
+├── manage.py
+
+Each app follows a consistent structure:
+
+api/
+├── views.py
+├── serializers.py
+├── urls.py
+├── permissions.py
+
+---
+
+## Installation
+
 ```bash
+cd BE
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+Testing
+
+Run full test suite:
+
 python manage.py test
-```
 
-## API Endpoints
+Run specific app tests:
 
-### Authentication Contract
+python manage.py test tasks_app
 
-Authentication uses DRF Token Authentication. Include `Authorization: Token <your_token>` in headers for protected endpoints. All failed login requests return `400 BAD REQUEST`.
+Target coverage: 95%+
 
-#### Registration
-`POST /api/registration/`
-- **Payload:**
-  ```json
-  {
-    "fullname": "John Doe",
-    "email": "johndoe@example.com",
-    "password": "StrongPassword123!",
-    "repeated_password": "StrongPassword123!"
-  }
-  ```
-- **Response (201 Created):**
-  ```json
-  {
-    "token": "xxx",
-    "fullname": "John Doe",
-    "email": "johndoe@example.com",
-    "user_id": 1
-  }
-  ```
+API Overview
+Authentication
+POST /api/registration/ – Create user
+POST /api/login/ – Get auth token
+Boards
+GET /api/boards/ – List boards
+POST /api/boards/ – Create board
+GET /api/boards/{id}/ – Board details
+PATCH /api/boards/{id}/ – Update members
+DELETE /api/boards/{id}/ – Delete board (owner only)
+Tasks
+POST /api/tasks/ – Create task
+PATCH /api/tasks/{id}/ – Update task
+DELETE /api/tasks/{id}/ – Delete task
+GET /api/tasks/assigned-to-me/ – My tasks
+GET /api/tasks/reviewing/ – Review tasks
+Comments
+GET /api/tasks/{task_id}/comments/ – List comments
+POST /api/tasks/{task_id}/comments/ – Add comment
+DELETE /api/tasks/{task_id}/comments/{id}/ – Delete comment (author only)
+Permissions
+Boards
+Owner: full control
+Members: limited read/write access
+Tasks
+Accessible only to board members
+Only creator or owner can delete
+Comments
+Only board members can create
+Only author can delete
 
-#### Login
-`POST /api/login/`
-- **Payload:**
-  ```json
-  {
-    "email": "johndoe@example.com",
-    "password": "StrongPassword123!"
-  }
-  ```
-- **Response (200 OK):**
-  ```json
-  {
-    "token": "xxx",
-    "fullname": "John Doe",
-    "email": "johndoe@example.com",
-    "user_id": 1
-  }
-  ```
+Unauthorized access:
+
+401 unauthenticated
+404 hidden resources (security by design)
+Data Rules
+Tasks belong to boards
+Comments belong to tasks
+Users only access boards they belong to
+Board owner is assigned automatically
+CORS
+
+Configured for development:
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+Restrict origins in production.
+
+Project Goals
+Clean REST architecture
+Strict role-based access control
+Predictable API behavior
+Scalable frontend integration
