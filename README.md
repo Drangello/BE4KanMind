@@ -1,111 +1,90 @@
-# Kanban Backend API (Django REST Framework)
+# Kanban Board REST API
 
-A RESTful backend for a Kanban system built with Django REST Framework. It supports boards, tasks, and comments with strict role-based access control (owner/member) and secure object-level permissions.
+Eine robuste, kollaborative Kanban-Board-API, entwickelt mit Django REST Framework (DRF).
 
-The API is designed for clean architecture, predictable responses, and safe multi-user collaboration.
-
----
-
-## Tech Stack
-
-- Django 5.x
-- Django REST Framework 3.x
-- SQLite (development)
-- Token Authentication
+## 🚀 Features
+- **Authentifizierung**: Token-basiertes Login mit benutzerdefinierten User-Modellen (Email-Login).
+- **Board-Management**: Rollenbasierte Zugriffskontrolle (Owner vs. Member).
+- **Task-Management**: Status-Tracking, Priorisierung und Zuweisungen.
+- **Threaded Comments**: Verschachtelte Kommentarfunktion für Aufgaben.
+- **Sicherheit**: Objekt-Level-Berechtigungen gegen IDOR-Schwachstellen.
 
 ---
 
-## Project Structure
+## 🛠️ Voraussetzungen
+- Python 3.10+
+- `pip` (Python Paket-Manager)
 
-BE/
-├── core/
-├── auth_app/
-├── boards_app/
-├── tasks_app/
-├── manage.py
+## 🚀 Setup & Installation
 
-Each app follows a consistent structure:
+1. **Repository klonen**:
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
 
-api/
-├── views.py
-├── serializers.py
-├── urls.py
-├── permissions.py
+2. **Virtuelle Umgebung erstellen & aktivieren**:
+   ```bash
+   python -m venv venv
+   # Windows:
+   venv\Scripts\activate
+   # macOS/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Abhängigkeiten installieren**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Umgebungsvariablen konfigurieren**:
+   Erstelle eine `.env` Datei im Hauptverzeichnis (basierend auf `.env.example`) und hinterlege deine `SECRET_KEY` und `DEBUG` Einstellungen.
+
+5. **Datenbank-Migrationen ausführen**:
+   ```bash
+   python manage.py migrate
+   ```
+
+6. **Server starten**:
+   ```bash
+   python manage.py runserver
+   ```
+   Die API ist unter `http://127.0.0.1:8000/` verfügbar.
 
 ---
 
-## Installation
+## 🧪 Testing
 
+Führe die Test-Suite aus, um die Integrität der API sicherzustellen:
 ```bash
-cd BE
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
-Testing
-
-Run full test suite:
-
 python manage.py test
+```
 
-Run specific app tests:
+---
 
-python manage.py test tasks_app
+## 🏗️ Architektur & Module
 
-Target coverage: 95%+
+Das System ist modular in drei Apps unterteilt:
+- **`auth_app`**: Identity & Access Management (Custom User, Token Auth).
+- **`boards_app`**: Board-Logik (Besitzverhältnisse, Einladungen).
+- **`tasks_app`**: Aufgaben-Management & Kommentar-Thread-Struktur.
 
-API Overview
-Authentication
-POST /api/registration/ – Create user
-POST /api/login/ – Get auth token
-Boards
-GET /api/boards/ – List boards
-POST /api/boards/ – Create board
-GET /api/boards/{id}/ – Board details
-PATCH /api/boards/{id}/ – Update members
-DELETE /api/boards/{id}/ – Delete board (owner only)
-Tasks
-POST /api/tasks/ – Create task
-PATCH /api/tasks/{id}/ – Update task
-DELETE /api/tasks/{id}/ – Delete task
-GET /api/tasks/assigned-to-me/ – My tasks
-GET /api/tasks/reviewing/ – Review tasks
-Comments
-GET /api/tasks/{task_id}/comments/ – List comments
-POST /api/tasks/{task_id}/comments/ – Add comment
-DELETE /api/tasks/{task_id}/comments/{id}/ – Delete comment (author only)
-Permissions
-Boards
-Owner: full control
-Members: limited read/write access
-Tasks
-Accessible only to board members
-Only creator or owner can delete
-Comments
-Only board members can create
-Only author can delete
+---
 
-Unauthorized access:
+## 🔐 Security & Permissions
 
-401 unauthenticated
-404 hidden resources (security by design)
-Data Rules
-Tasks belong to boards
-Comments belong to tasks
-Users only access boards they belong to
-Board owner is assigned automatically
-CORS
+- **Authentifizierung**: Erfordert `Authorization: Token <key>` im Header.
+- **Visibility**: Striktes Object-Level-Permission-Handling (User sehen nur Boards, denen sie zugeordnet sind).
+- **Role Actions**:
+  - *Owner*: Board-Löschung möglich.
+  - *Creator/Owner*: Task-Löschung möglich.
+  - *Author*: Kommentar-Löschung möglich.
 
-Configured for development:
+---
 
-CORS_ALLOW_ALL_ORIGINS = True
+## 🗄️ Datenhaltung & Beziehungen
 
-Restrict origins in production.
-
-Project Goals
-Clean REST architecture
-Strict role-based access control
-Predictable API behavior
-Scalable frontend integration
+- **Cascading Deletes**:
+  - Board gelöscht → Alle Tasks werden entfernt.
+  - Task gelöscht → Alle zugehörigen Kommentare werden entfernt.
+- **Data Preservation**: Beim Löschen eines Users bleiben Tasks/Kommentare erhalten; die User-Referenz wird auf `NULL` gesetzt, um die Historie zu wahren.
