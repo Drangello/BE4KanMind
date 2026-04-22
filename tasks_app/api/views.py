@@ -43,33 +43,50 @@ class TaskViewSet(viewsets.ModelViewSet):
 from .serializers import CommentSerializer
 from .permissions import IsCommentAuthor
 from tasks_app.models import Comment
+from rest_framework import generics
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 
-class CommentViewSet(viewsets.ModelViewSet):
+class TaskCommentListView(generics.ListCreateAPIView):
     """
-    ViewSet for viewing, adding, and deleting comments on tasks.
-    
-    Users can only comment on tasks within boards they have access to.
-    Updating comments is not permitted.
+    GET /api/tasks/{task_id}/comments/
+    POST /api/tasks/{task_id}/comments/
+    """
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def _get_task(self):
+        task_id = self.kwargs.get('task_id')
+        task = get_object_or_404(Task, id=task_id)
+        user = self.request.user
+        if user != task.board.owner and user not in task.board.members.all():
+            raise PermissionDenied("You must be a member of the board to access comments.")
+        return task
+
+    def get_queryset(self):
+        task = self._get_task()
+        return Comment.objects.filter(task=task).order_by('created_at')
+
+    def perform_create(self, serializer):
+        task = self._get_task()
+        serializer.save(author=self.request.user, task=task)
+
+class TaskCommentDetailView(generics.DestroyAPIView):
+    """
+    DELETE /api/tasks/{task_id}/comments/{comment_id}/
     """
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsCommentAuthor]
-    http_method_names = ['get', 'post', 'delete', 'head', 'options']
-
-    def get_queryset(self):
-        user = self.request.user
-        qs = Comment.objects.filter(
-            Q(task__board__owner=user) | Q(task__board__members=user)
-        ).distinct()
+    
+    def get_object(self):
+        task_id = self.kwargs.get('task_id')
+        comment_id = self.kwargs.get('comment_id')
+        task = get_object_or_404(Task, id=task_id)
         
-        task_id = self.request.query_params.get('task')
-        if task_id:
-            qs = qs.filter(task_id=task_id)
-        return qs
-
-    def perform_create(self, serializer):
-        from rest_framework.exceptions import PermissionDenied
-        task = serializer.validated_data.get('task')
         user = self.request.user
         if user != task.board.owner and user not in task.board.members.all():
-            raise PermissionDenied("You must belong to board to comment.")
-        serializer.save(author=user)
+            raise PermissionDenied("You must be a member of the board to interact with comments.")
+            
+        comment = get_object_or_404(Comment, id=comment_id, task=task)
+        self.check_object_permissions(self.request, comment)
+        return comment

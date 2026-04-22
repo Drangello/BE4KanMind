@@ -75,5 +75,5 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         from tasks_app.models import Comment
         model = Comment
-        fields = ('id', 'task', 'author', 'content', 'created_at')
+        fields = ('id', 'author', 'content', 'created_at')
         read_only_fields = ('author',)
