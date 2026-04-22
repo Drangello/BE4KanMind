@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from tasks_app.models import Task
 from boards_app.models import Board
 from django.contrib.auth import get_user_model
@@ -43,7 +44,6 @@ class TaskSerializer(serializers.ModelSerializer):
         return 0
 
     def validate_board(self, value):
-        from rest_framework.exceptions import PermissionDenied
         if self.instance and self.instance.board != value:
             raise serializers.ValidationError("Cannot move a task to a different board.")
         user = self.context['request'].user
@@ -55,7 +55,11 @@ class TaskSerializer(serializers.ModelSerializer):
         board = attrs.get('board')
         if not board and self.instance:
             board = self.instance.board
-        
+
+        user = self.context['request'].user
+        if user != board.owner and user not in board.members.all():
+            raise PermissionDenied("You must be a board member.")
+
         self._validate_board_role(attrs.get('assignee'), board, "assignee")
         self._validate_board_role(attrs.get('reviewer'), board, "reviewer")
         return attrs

@@ -62,7 +62,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
-        # After creation, fetch the annotated instance to return the exact same format as GET /api/boards/
         board = self.get_queryset().get(id=serializer.instance.id)
         response_serializer = BoardListSerializer(board)
         headers = self.get_success_headers(serializer.data)

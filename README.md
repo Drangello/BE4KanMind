@@ -66,9 +66,9 @@ Security is strictly enforced on an object-level basis:
 - **Authentication:** All major endpoints require an `Authorization: Token <key>` header.
 - **Board Visibility:** Users can only fetch and update data for boards they own or are explicitly invited to as members.
 - **Role Actions:** 
-  - 🗑️ Only **Owners** can delete their boards.
-  - 🗑️ Only **Creators** or **Owners** can delete a task.
-  - 🗑️ Only **Comment Authors** can delete their own comments.
+  - Only **Owners** can delete their boards.
+  - Only **Creators** or **Owners** can delete a task.
+  - Only **Comment Authors** can delete their own comments.
 
 ---
 

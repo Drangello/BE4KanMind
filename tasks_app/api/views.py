@@ -30,7 +30,9 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
-        tasks = self.get_queryset().filter(assignee=request.user)
+        tasks = self.get_queryset().filter(
+            Q(assignee=request.user) | Q(reviewer=request.user)
+        )
         serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data)
 
