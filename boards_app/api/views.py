@@ -5,7 +5,7 @@ from rest_framework import status
 from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
 from boards_app.models import Board
-from .serializers import BoardListSerializer, BoardDetailSerializer, BoardCreateUpdateSerializer, MemberSerializer
+from .serializers import BoardListSerializer, BoardDetailSerializer, BoardCreateUpdateSerializer, MemberSerializer, BoardPatchResponseSerializer
 from .permissions import IsBoardMember, IsBoardOwner
 from rest_framework.permissions import IsAuthenticated
 
@@ -56,6 +56,30 @@ class BoardViewSet(viewsets.ModelViewSet):
             members = serializer.validated_data['members']
             board.members.set(members)
             board.members.add(board.owner)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # After creation, fetch the annotated instance to return the exact same format as GET /api/boards/
+        board = self.get_queryset().get(id=serializer.instance.id)
+        response_serializer = BoardListSerializer(board)
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        response_serializer = BoardPatchResponseSerializer(instance)
+        return Response(response_serializer.data)
 
 class EmailCheckView(APIView):
     """

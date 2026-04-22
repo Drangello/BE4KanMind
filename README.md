@@ -7,12 +7,15 @@ A Django REST Framework (DRF) backend for a collaborative Kanban Board applicati
 1. **Create and activate a virtual environment**:
    ```bash
 python -m venv venv
+   ```
+   ```bash
 # Windows:
 venv\Scripts\activate
+   ```
+   ```bash
 # macOS/Linux:
 source venv/bin/activate
    ```
-
 2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt

@@ -74,3 +74,14 @@ class BoardCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = ('id', 'title', 'members')
+
+class BoardPatchResponseSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the response of a successful PATCH request to a Board.
+    """
+    owner_data = MemberSerializer(source='owner', read_only=True)
+    members_data = MemberSerializer(source='members', many=True, read_only=True)
+
+    class Meta:
+        model = Board
+        fields = ('id', 'title', 'owner_data', 'members_data')
