@@ -24,28 +24,23 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Run database migrations
+### 3. Environment variables
+
+Create a .env file based on .env.example:
+```bash
+cp .env.example .env
+```
+
+### 4. Run database migrations
 ```bash
 python manage.py migrate
 ```
 
-### 4. Start the development server
+### 5. Start the development server
 ```bash
 python manage.py runserver
 ```
 > The API will be available at `http://127.0.0.1:8000/`.
-
----
-
-## Testing
-
-To ensure everything is working correctly, run the test suite:
-
-```bash
-python manage.py test
-```
-
----
 
 ## Architecture & Apps
 
