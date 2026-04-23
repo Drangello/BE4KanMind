@@ -13,7 +13,6 @@ class CustomUserAdmin(UserAdmin):
         ('Extra Profil-Daten', {'fields': ('fullname',)}),
     )
 
-    # 🔥 Löschen erlauben
     def has_delete_permission(self, request, obj=None):
         if obj is not None and obj == request.user:
             return False
