@@ -7,16 +7,17 @@ class CustomUserAdmin(UserAdmin):
     model = User
     list_display = ['email', 'username', 'fullname', 'is_staff', 'is_active']
     search_fields = ['email', 'username', 'fullname']
+    list_filter = ['is_staff', 'is_active']
 
     fieldsets = UserAdmin.fieldsets + (
         ('Extra Profil-Daten', {'fields': ('fullname',)}),
     )
 
+    # 🔥 Löschen erlauben
     def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-
-        return request.user.is_staff
+        if obj is not None and obj == request.user:
+            return False
+        return request.user.is_staff or request.user.is_superuser
 
 
 admin.site.register(User, CustomUserAdmin)
