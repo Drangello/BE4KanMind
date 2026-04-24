@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from tasks_app.models import Task, Comment
+from boards_app.models import Board
 from .serializers import TaskSerializer, CommentSerializer
 from .permissions import IsTaskCreatorOrBoardOwner, IsCommentAuthor
 
@@ -36,6 +37,14 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        board_id = request.data.get('board')
+        if board_id:
+            if not Board.objects.filter(id=board_id).exists():
+                raise NotFound("Board not found.")
+        
+        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
