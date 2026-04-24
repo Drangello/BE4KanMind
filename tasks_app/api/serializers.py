@@ -1,8 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from tasks_app.models import Task
+
 from boards_app.models import Board
-from django.contrib.auth import get_user_model
+from tasks_app.models import Task
 
 User = get_user_model()
 

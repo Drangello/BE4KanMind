@@ -1,14 +1,14 @@
-from rest_framework import viewsets, generics
-from rest_framework.decorators import action
-from rest_framework.response import Response
 from django.db.models import Q
+from rest_framework import generics, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.response import Response
 
-from tasks_app.models import Task, Comment
 from boards_app.models import Board
-from .serializers import TaskSerializer, CommentSerializer
-from .permissions import IsTaskCreatorOrBoardOwner, IsCommentAuthor
+from tasks_app.models import Comment, Task
+from .permissions import IsCommentAuthor, IsTaskCreatorOrBoardOwner
+from .serializers import CommentSerializer, TaskSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):

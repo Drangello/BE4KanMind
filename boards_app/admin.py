@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import Board
 from tasks_app.models import Task
 

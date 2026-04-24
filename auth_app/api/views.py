@@ -1,10 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.contrib.auth import authenticate
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, get_user_model
-from .serializers import RegistrationSerializer, LoginSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import LoginSerializer, RegistrationSerializer
 
 class RegistrationView(APIView):
     """

@@ -1,19 +1,19 @@
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Count, Q
 from django.contrib.auth import get_user_model
-from boards_app.models import Board
-from .serializers import (
-    BoardListSerializer,
-    BoardDetailSerializer,
-    BoardCreateUpdateSerializer,
-    BoardPatchResponseSerializer
-)
-from .permissions import IsBoardMember, IsBoardOwner
+from django.db.models import Count, Q
+from rest_framework import status, viewsets
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from boards_app.models import Board
+from .permissions import IsBoardMember, IsBoardOwner
+from .serializers import (
+    BoardCreateUpdateSerializer,
+    BoardDetailSerializer,
+    BoardListSerializer,
+    BoardPatchResponseSerializer,
+)
 
 User = get_user_model()
 
