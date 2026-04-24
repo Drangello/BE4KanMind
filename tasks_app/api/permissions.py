@@ -24,9 +24,14 @@ class IsCommentAuthor(permissions.BasePermission):
     """
     Object-level permission for Comments.
     
-    - DELETE: Only the author of the comment may delete it.
+    - SAFE_METHODS & PUT/PATCH: User must be a member of the task's board.
+    - DELETE: Only the author of the comment may delete it, and must be a board member.
     """
     def has_object_permission(self, request, view, obj):
+        user = request.user
+        board = obj.task.board
+        is_member = user == board.owner or user in board.members.all()
+        
         if request.method in permissions.SAFE_METHODS:
-            return True
-        return obj.author == request.user
+            return is_member
+        return obj.author == request.user and is_member

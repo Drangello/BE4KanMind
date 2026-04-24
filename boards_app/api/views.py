@@ -58,10 +58,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         if not obj:
             raise NotFound("Board not found.")
 
-        user = self.request.user
-        if user != obj.owner and user not in obj.members.all():
-            raise PermissionDenied("You do not have access to this board.")
-
         return obj
 
     def list(self, request, *args, **kwargs):

@@ -23,10 +23,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not obj:
             raise NotFound("Task not found.")
 
-        user = self.request.user
-        if user != obj.board.owner and user not in obj.board.members.all():
-            raise PermissionDenied("You do not have access to this task.")
-
         return obj
 
     def list(self, request, *args, **kwargs):
@@ -70,10 +66,6 @@ class TaskCommentListView(generics.ListCreateAPIView):
         if not task:
             raise NotFound("Task not found.")
 
-        user = self.request.user
-        if user != task.board.owner and user not in task.board.members.all():
-            raise PermissionDenied("You must be a member of the board.")
-
         return task
 
     def get_queryset(self):
@@ -94,10 +86,6 @@ class TaskCommentDetailView(generics.DestroyAPIView):
 
         if not task:
             raise NotFound("Task not found.")
-
-        user = self.request.user
-        if user != task.board.owner and user not in task.board.members.all():
-            raise PermissionDenied("You must be a member of the board.")
 
         comment = Comment.objects.filter(
             id=self.kwargs.get('comment_id'),
