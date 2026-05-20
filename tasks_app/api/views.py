@@ -10,7 +10,6 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from boards_app.models import Board
 from tasks_app.models import Comment, Task
 from .permissions import IsCommentAuthor, IsTaskCreatorOrBoardOwner
 from .serializers import CommentSerializer, TaskSerializer
