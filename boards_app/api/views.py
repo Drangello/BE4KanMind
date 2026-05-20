@@ -52,13 +52,6 @@ class BoardViewSet(viewsets.ModelViewSet):
             )
         )
 
-    def get_object(self):
-        obj = Board.objects.filter(id=self.kwargs.get('pk')).first()
-
-        if not obj:
-            raise NotFound("Board not found.")
-
-        return obj
 
     def list(self, request, *args, **kwargs):
         user = request.user

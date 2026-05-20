@@ -18,13 +18,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Task.objects.all()
 
-    def get_object(self):
-        obj = Task.objects.filter(id=self.kwargs.get('pk')).first()
-
-        if not obj:
-            raise NotFound("Task not found.")
-
-        return obj
 
     def list(self, request, *args, **kwargs):
         user = request.user
@@ -38,13 +31,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        board_id = request.data.get('board')
-        if board_id:
-            if not Board.objects.filter(id=board_id).exists():
-                raise NotFound("Board not found.")
-        
-        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
@@ -75,6 +61,10 @@ class TaskCommentListView(generics.ListCreateAPIView):
         if not task:
             raise NotFound("Task not found.")
 
+        user = self.request.user
+        if user != task.board.owner and user not in task.board.members.all():
+            raise PermissionDenied("You do not have permission to access this task.")
+
         return task
 
     def get_queryset(self):
@@ -95,6 +85,10 @@ class TaskCommentDetailView(generics.DestroyAPIView):
 
         if not task:
             raise NotFound("Task not found.")
+
+        user = self.request.user
+        if user != task.board.owner and user not in task.board.members.all():
+            raise PermissionDenied("You do not have permission to access this task.")
 
         comment = Comment.objects.filter(
             id=self.kwargs.get('comment_id'),
