@@ -91,4 +91,4 @@ class TaskTests(APITestCase):
 
     def test_unauthorized_access(self):
         self.client.force_authenticate(user=self.u_outsider)
-        self.assertEqual(self.client.get(self.detail_url).status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.get(self.detail_url).status_code, status.HTTP_403_FORBIDDEN)

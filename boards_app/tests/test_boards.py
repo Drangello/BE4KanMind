@@ -78,4 +78,4 @@ class BoardTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.client.force_authenticate(user=self.user3)
         response = self.client.get(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) # Filters by membership, so gives 404
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
