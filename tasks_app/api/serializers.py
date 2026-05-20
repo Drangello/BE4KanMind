@@ -45,6 +45,11 @@ class TaskSerializer(serializers.ModelSerializer):
         return 0
 
     def validate_board(self, value):
+        """
+        Validates the board field.
+        Prevents moving a task to a different board after creation.
+        Ensures the current user is a member or owner of the board to allow task creation.
+        """
         if self.instance and self.instance.board != value:
             raise serializers.ValidationError("Cannot move a task to a different board.")
         user = self.context['request'].user
@@ -53,6 +58,11 @@ class TaskSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
+        """
+        Object-level validation.
+        Ensures the current user is part of the board, and that assigned users 
+        (assignee, reviewer) are also valid members of the same board.
+        """
         board = attrs.get('board')
         if not board and self.instance:
             board = self.instance.board
@@ -66,6 +76,10 @@ class TaskSerializer(serializers.ModelSerializer):
         return attrs
 
     def _validate_board_role(self, user_obj, board, field_name):
+        """
+        Helper method to verify if a specified user (e.g. assignee, reviewer)
+        is a valid member or owner of the given board.
+        """
         if user_obj and user_obj not in board.members.all() and user_obj != board.owner:
             raise serializers.ValidationError({field_name: "User is not a board member."})
 
