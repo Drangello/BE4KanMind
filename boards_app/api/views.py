@@ -74,7 +74,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         for the currently authenticated user (either as owner or member).
         """
         user = request.user
-        # Retrieve boards where the user is either the owner or a member
         queryset = self.get_queryset().filter(
             Q(owner=user) | Q(members=user)
         ).distinct()
@@ -90,7 +89,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         board = serializer.save(owner=self.request.user)
         members = serializer.validated_data.get('members', [])
         board.members.set(members)
-        # Ensure the owner is always part of the members list
         board.members.add(self.request.user)
 
     def perform_update(self, serializer):
@@ -113,7 +111,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        # Re-fetch the board using the annotated queryset for the response payload
         board = self.get_queryset().get(id=serializer.instance.id)
         response_serializer = BoardListSerializer(board)
         headers = self.get_success_headers(serializer.data)
@@ -140,7 +137,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        # Clear prefetched cache to ensure nested relationships are fresh
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 

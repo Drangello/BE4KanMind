@@ -28,7 +28,6 @@ class TaskNestedSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'description', 'status', 'priority', 'assignee', 'reviewer', 'due_date', 'comments_count')
 
     def get_comments_count(self, obj):
-        # Placeholder until comments are modeled
         return 0
 
 class BoardListSerializer(serializers.ModelSerializer):

@@ -93,7 +93,6 @@ class TaskCommentListView(generics.ListCreateAPIView):
         if not task:
             raise NotFound("Task not found.")
 
-        # Check if the user is part of the task's board before granting access
         user = self.request.user
         if user != task.board.owner and user not in task.board.members.all():
             raise PermissionDenied("You do not have permission to access this task.")
@@ -133,7 +132,6 @@ class TaskCommentDetailView(generics.DestroyAPIView):
         if not task:
             raise NotFound("Task not found.")
 
-        # Security check: Must belong to the board to interact with the task
         user = self.request.user
         if user != task.board.owner and user not in task.board.members.all():
             raise PermissionDenied("You do not have permission to access this task.")
@@ -146,6 +144,5 @@ class TaskCommentDetailView(generics.DestroyAPIView):
         if not comment:
             raise NotFound("Comment not found.")
 
-        # Evaluates IsCommentAuthor to ensure only the author can delete it
         self.check_object_permissions(self.request, comment)
         return comment

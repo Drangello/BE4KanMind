@@ -55,7 +55,7 @@ class CommentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_comment_forbidden(self):
-        self.client.force_authenticate(user=self.u_member) # member, but not author
+        self.client.force_authenticate(user=self.u_member)
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
