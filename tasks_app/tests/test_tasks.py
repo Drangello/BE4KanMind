@@ -52,6 +52,12 @@ class TaskTests(APITestCase):
         response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_create_missing_board_not_found(self):
+        self.client.force_authenticate(user=self.u_member1)
+        data = {"title": "T2", "board": 4000}
+        response = self.client.post(self.list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_patch_task(self):
         self.client.force_authenticate(user=self.u_member2)
         data = {"status": "in-progress"}

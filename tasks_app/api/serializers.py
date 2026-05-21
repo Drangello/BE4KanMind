@@ -1,11 +1,23 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from boards_app.models import Board
 from tasks_app.models import Task
 
 User = get_user_model()
+
+class BoardPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Returns 404 instead of 400 when a syntactically valid board id does not exist.
+    """
+    def to_internal_value(self, data):
+        try:
+            return super().to_internal_value(data)
+        except serializers.ValidationError as exc:
+            if exc.get_codes() == ['does_not_exist']:
+                raise NotFound("Board not found.")
+            raise
 
 class UserNestedSerializer(serializers.ModelSerializer):
     """
@@ -24,6 +36,7 @@ class TaskSerializer(serializers.ModelSerializer):
     """
     assignee = UserNestedSerializer(read_only=True)
     reviewer = UserNestedSerializer(read_only=True)
+    board = BoardPrimaryKeyRelatedField(queryset=Board.objects.all())
     assignee_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source='assignee', allow_null=True, required=False, write_only=True
     )
